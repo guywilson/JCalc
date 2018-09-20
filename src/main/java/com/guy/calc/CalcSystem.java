@@ -1,5 +1,8 @@
 package com.guy.calc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
@@ -16,6 +19,8 @@ public class CalcSystem
 	private MathContext mc = null;
 	private Base base = Base.Dec;
 	private int scale = MAX_DISPLAY_SCALE;
+	
+	private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	
 	private static CalcSystem instance = null;
 	
@@ -65,5 +70,71 @@ public class CalcSystem
 	
 	public void setMemoryValueAt(int index, Operand value) {
 		this.memory[index] = value;
+	}
+    
+	public String getModeStr()
+	{
+	    String mode = null;
+	    
+	    switch (getBase()) {
+	        case Dec:
+	            mode = "DEC";
+	            break;
+	            
+	        case Hex:
+	            mode = "HEX";
+	            break;
+	            
+	        case Bin:
+	            mode = "BIN";
+	            break;
+	            
+	        case Oct:
+	            mode = "OCT";
+	            break;
+	    }
+	    
+	    return mode;
+	}
+	
+	public String getCalculation() throws Exception
+	{
+		String calculation = null;
+		
+	    try {
+			System.out.print("calc [" + getModeStr() + "]> ");
+			calculation = br.readLine();
+		}
+	    catch (IOException e) {
+			throw new Exception("Caught IOException - " + e.getMessage());
+		}
+	    
+	    return calculation;
+	}
+	
+	private String readLine() throws Exception
+	{
+		StringBuffer line = new StringBuffer();
+		int ch;
+		boolean eol = false;
+		
+		try {
+			while (!eol) {
+				ch = br.read();
+				
+				if (ch == '\n' || ch == '\r') {
+					eol = true;
+				}
+				else {
+					line.append((char)ch);
+				}
+			}
+		}
+		catch (Exception e) {
+			System.out.println("Caught exception - " + e.getMessage());
+			throw e;
+		}
+		
+		return line.toString();
 	}
 }

@@ -181,31 +181,6 @@ public class Calculator
 			}
 		}
 	}
-        
-    public String getModeStr()
-    {
-        String mode = null;
-        
-        switch (sys.getBase()) {
-            case Dec:
-                mode = "DEC";
-                break;
-                
-            case Hex:
-                mode = "HEX";
-                break;
-                
-            case Bin:
-                mode = "BIN";
-                break;
-                
-            case Oct:
-                mode = "OCT";
-                break;
-        }
-        
-        return mode;
-    }
                       
 	public Operand evaluate(String expression) throws Exception
 	{

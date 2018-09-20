@@ -1,12 +1,7 @@
 package com.guy.calc;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
-import com.guy.calc.util.CharUtils;
 import com.guy.calc.util.DebugHelper;
 
 public class Main
@@ -47,34 +42,6 @@ public class Main
 		System.out.println("\texit\tExit the calculator\n");
 	}
 	
-	private static String readLine(BufferedReader r) throws Exception
-	{
-		StringBuffer line = new StringBuffer();
-		int ch;
-		boolean eol = false;
-		
-		try {
-			while (!eol) {
-				ch = r.read();
-				
-				System.out.print("[" + Character.getNumericValue(ch) + "]");
-				
-				if (ch == '\n' || ch == '\r') {
-					eol = true;
-				}
-				else {
-					line.append((char)ch);
-				}
-			}
-		}
-		catch (Exception e) {
-			System.out.println("Caught exception - " + e.getMessage());
-			throw e;
-		}
-		
-		return line.toString();
-	}
-	
 	public static void main(String[] args)
 	{
 		String						calculation = null;
@@ -104,20 +71,16 @@ public class Main
 			System.out.println("Welcome to Calc. A command line scientific calculator.");
 			System.out.println("Type a calculation or command at the prompt, type 'help' for info.\n");
 		}
-
+		
 		loop = true;
 
 		while (loop) {
 			try {
 				if (!hasParams) {
 				    try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-						
-						System.out.print("calc [" + calc.getModeStr() + "]> ");
-						//calculation = br.readLine();
-						calculation = readLine(br);
+						calculation = sys.getCalculation();
 					}
-				    catch (IOException e) {
+				    catch (Exception e) {
 						e.printStackTrace();
 					}
 

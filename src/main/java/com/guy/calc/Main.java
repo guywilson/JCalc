@@ -78,7 +78,7 @@ public class Main
 			try {
 				if (!hasParams) {
 				    try {
-						calculation = sys.getCalculation();
+						calculation = sys.getUserInput();
 					}
 				    catch (Exception e) {
 						e.printStackTrace();

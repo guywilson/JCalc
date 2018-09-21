@@ -97,19 +97,19 @@ public class CalcSystem
 	    return mode;
 	}
 	
-	public String getCalculation() throws Exception
+	public String getUserInput() throws Exception
 	{
-		String calculation = null;
+		String input = null;
 		
 	    try {
 			System.out.print("calc [" + getModeStr() + "]> ");
-			calculation = br.readLine();
+			input = br.readLine();
 		}
 	    catch (IOException e) {
 			throw new Exception("Caught IOException - " + e.getMessage());
 		}
 	    
-	    return calculation;
+	    return input;
 	}
 	
 	private String readLine() throws Exception

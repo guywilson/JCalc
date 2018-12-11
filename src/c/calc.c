@@ -113,35 +113,35 @@ void clearLine()
 
 void cursorLeft(int n)
 {
-	if (n > 9) {
-		n = 9;
-	}
-	else if (n < 0) {
+	int i = 0;
+
+	if (n < 0) {
 		n = 0;
 	}
 
 	if (n > 0) {
-		putchar(CHAR_ESCAPE);
-		putchar(CHAR_CSI);
-		putchar('0' + n);
-		putchar(CHAR_LEFT);
+		for (i = 0;i < n;i++) {
+			putchar(CHAR_ESCAPE);
+			putchar(CHAR_CSI);
+			putchar(CHAR_LEFT);
+		}
 	}
 }
 
 void cursorRight(int n)
 {
-	if (n > 9) {
-		n = 9;
-	}
-	else if (n < 0) {
+	int i = 0;
+
+	if (n < 0) {
 		n = 0;
 	}
 
 	if (n > 0) {
-		putchar(CHAR_ESCAPE);
-		putchar(CHAR_CSI);
-		putchar('0' + n);
-		putchar(CHAR_RIGHT);
+		for (i = 0;i < n;i++) {
+			putchar(CHAR_ESCAPE);
+			putchar(CHAR_CSI);
+			putchar(CHAR_RIGHT);
+		}
 	}
 }
 
@@ -158,7 +158,7 @@ void delete()
 
 	if (cursorPos < eolPos) {
 		for (i = cursorPos;i < eolPos;i++) {
-			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
+//			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
 
 			putchar(szCalculation[i]);
 
@@ -175,7 +175,7 @@ void delete()
 		strcpy(szTemp, &szCalculation[cursorPos]);
 		strcat(szCalculation, szTemp);
 
-		debugLine("Concat string [%s]", szTemp);
+//		debugLine("Concat string [%s]", szTemp);
 	}
 	else {
 		putchar(' ');
@@ -210,7 +210,7 @@ void insert(int ch)
 
 	if (cursorPos < eolPos) {
 		for (i = cursorPos + 1,j = 0;i <= eolPos;i++,j++) {
-			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
+//			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
 
 			putchar(szTemp[j]);
 			szCalculation[i] = szTemp[j];

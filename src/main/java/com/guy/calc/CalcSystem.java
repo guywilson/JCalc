@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.Scanner;
 
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
@@ -13,6 +14,7 @@ public class CalcSystem
 {
 	public final static int MAX_DISPLAY_PRECISION = 64;
 	public final static int MAX_DISPLAY_SCALE = 32;
+	public final static int DEFAULT_SCALE = 2;
 	public final static int NUM_MEMORY_SLOTS = 10;
 	
 	private Operand memory[] = new Operand[NUM_MEMORY_SLOTS];
@@ -22,12 +24,15 @@ public class CalcSystem
 	
 	private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	
+	private Scanner scan = new Scanner(System.in);
+	
 	private static CalcSystem instance = null;
 	
 	private CalcSystem()
 	{
 		this.mc = new MathContext(MAX_DISPLAY_PRECISION, RoundingMode.HALF_UP);
 		this.base = Base.Dec;
+		this.scale = DEFAULT_SCALE;
 	}
 	
 	public static CalcSystem getInstance()
@@ -103,10 +108,20 @@ public class CalcSystem
 		
 	    try {
 			System.out.print("calc [" + getModeStr() + "]> ");
+			
+//			while (true) {
+//				byte b = scan.nextByte();
+//				
+//				input = input + b;
+//				
+//				if (b == '\n') {
+//					break;
+//				}
+//			}
 			input = br.readLine();
 		}
-	    catch (IOException e) {
-			throw new Exception("Caught IOException - " + e.getMessage());
+	    catch (Exception e) {
+			throw new Exception("Caught Exception - " + e.getMessage());
 		}
 	    
 	    return input;

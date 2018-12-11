@@ -27,15 +27,18 @@ LINKER=gcc
 CFLAGS=-c -O3 -fpermissive -Wall
 
 # Object files
-OBJFILES=$(BUILD)/calc.o
+OBJFILES=$(BUILD)/calc.o $(BUILD)/debug.o
 
 # Target
 all: $(TARGET) bin/calclogger
 
 # Compile C source files
 #
-$(BUILD)/calc.o: $(SOURCE)/calc.c $(SOURCE)/calc.h
+$(BUILD)/calc.o: $(SOURCE)/calc.c $(SOURCE)/calc.h $(SOURCE)/debug.h
 	$(C) $(CFLAGS) -o $(BUILD)/calc.o $(SOURCE)/calc.c
+
+$(BUILD)/debug.o: $(SOURCE)/debug.c $(SOURCE)/debug.h
+	$(C) $(CFLAGS) -o $(BUILD)/debug.o $(SOURCE)/debug.c
 
 $(BUILD)/calclogger.o: $(SOURCE)/calclogger.c
 	$(C) $(CFLAGS) -o $(BUILD)/calclogger.o $(SOURCE)/calclogger.c

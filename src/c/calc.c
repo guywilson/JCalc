@@ -5,6 +5,7 @@
 #include <termios.h>
 
 #include "calc.h"
+#include "debug.h"
 
 
 /*
@@ -17,28 +18,12 @@ char	szTemp[CMD_BUFFER_SIZE - 128];
 int		cursorPos = 0;
 int		eolPos = 0;
 
-FILE *	pipe;
-
-void debugLine(const char * pszDebugStr, ...)
-{
-	va_list		argptr;
-
-	va_start(argptr, pszDebugStr);
-
-	vfprintf(pipe, pszDebugStr, argptr);
-	fputs("\n", pipe);
-	fflush(pipe);
-
-	va_end(argptr);
-}
 
 void decCursorPos()
 {
 	if (cursorPos > 0) {
 		cursorPos--;
 	}
-
-	debugLine("[%d]", cursorPos);
 }
 
 void decEOLPos()
@@ -53,8 +38,6 @@ void incCursorPos()
 	if (cursorPos < eolPos) {
 		cursorPos++;
 	}
-
-	debugLine("[%d]", cursorPos);
 }
 
 void decCursorPosn(int n)
@@ -82,8 +65,6 @@ int readch()
     int ch;
     int fd_stdin;
 
-//    debugLine("readch() enter - Cursor pos [%d]", cursorPos);
-
     fd_stdin = fileno(stdin);
     
     tcgetattr(fd_stdin, &oldt);
@@ -96,19 +77,7 @@ int readch()
 
     tcsetattr(fd_stdin, TCSANOW, &oldt);
 
-//    debugLine("readch() exit - Cursor pos [%d]", cursorPos);
-    
     return ch;
-}
-
-void clearLine()
-{
-	putchar(CHAR_ESCAPE);
-	putchar(CHAR_CSI);
-	putchar('2');
-	putchar(CHAR_ERASEINLINE);
-
-	cursorPos = 0;
 }
 
 void cursorLeft(int n)
@@ -150,18 +119,11 @@ void delete()
 	int i = 0;
 	int	cursorLeftCount = 0;
 
-//    debugLine("delete() enter - Cursor pos [%d]", cursorPos);
-
-	putchar(CHAR_ESCAPE);
-	putchar(CHAR_CSI);
-	putchar(CHAR_LEFT);
+	cursorLeft(1);
 
 	if (cursorPos < eolPos) {
 		for (i = cursorPos;i < eolPos;i++) {
-//			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
-
 			putchar(szCalculation[i]);
-
 			cursorLeftCount++;
 		}
 
@@ -169,20 +131,16 @@ void delete()
 		cursorLeftCount++;
 	}
 
+	// Terminate the string prior to the cursor...
 	szCalculation[cursorPos - 1] = 0;
 
-	if (cursorPos < (eolPos - 1)) {
+	if (cursorPos < eolPos) {
 		strcpy(szTemp, &szCalculation[cursorPos]);
 		strcat(szCalculation, szTemp);
-
-//		debugLine("Concat string [%s]", szTemp);
 	}
 	else {
 		putchar(' ');
-
-		putchar(CHAR_ESCAPE);
-		putchar(CHAR_CSI);
-		putchar(CHAR_LEFT);
+		cursorLeft(1);
 	}
 
 	cursorLeft(cursorLeftCount);
@@ -191,8 +149,6 @@ void delete()
 	if (eolPos > 0) {
 		eolPos--;
 	}
-
-//    debugLine("delete() exit - Cursor pos [%d]", cursorPos);
 }
 
 void insert(int ch)
@@ -210,8 +166,6 @@ void insert(int ch)
 
 	if (cursorPos < eolPos) {
 		for (i = cursorPos + 1,j = 0;i <= eolPos;i++,j++) {
-//			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
-
 			putchar(szTemp[j]);
 			szCalculation[i] = szTemp[j];
 
@@ -225,6 +179,34 @@ void insert(int ch)
 
 	eolPos++;
 	cursorPos++;
+}
+
+void clearLine()
+{
+	putchar(CHAR_ESCAPE);
+	putchar(CHAR_CSI);
+	putchar('2');
+	putchar(CHAR_ERASEINLINE);
+
+	cursorLeft(cursorPos);
+
+	cursorPos = 0;
+	eolPos = 0;
+}
+
+void debugf(const char * pszString, ...)
+{
+	char		szBuffer[256];
+	va_list		argptr;
+
+	va_start(argptr, pszString);
+	vsprintf(szBuffer, pszString, argptr);
+	va_end(argptr);
+
+	printf("%s", szBuffer);
+
+	eolPos += strlen(szBuffer);
+	incCursorPosn(strlen(szBuffer));
 }
 
 void runCalculation(char * calculation)
@@ -247,11 +229,7 @@ int main(int argc, char **argv)
     int 	ch3 = 0;
     int 	go = 1;
 
-    pipe = fopen(argv[1], "w");
-
-	if (pipe == NULL) {
-		printf("Failed to open pipe [%s]\n", argv[1]);
-	}
+    //initRemoteLogging(argv[1]);
 
 	memset(szCalculation, 0, CMD_BUFFER_SIZE - 128);
 	memset(szTemp, 0, CMD_BUFFER_SIZE - 128);
@@ -269,12 +247,12 @@ int main(int argc, char **argv)
 					switch (ch3) {
 						case CHAR_UP:
 							clearLine();
-							printf("[UP]");
+							debugf("[UP]");
 							break;
 
 						case CHAR_DOWN:
 							clearLine();
-							printf("[DOWN]");
+							debugf("[DOWN]");
 							break;
 
 						case CHAR_LEFT:
@@ -295,7 +273,7 @@ int main(int argc, char **argv)
 
 				putchar(CHAR_NEWLINE);
 
-			    printf("Calculation: %s\n", szCalculation);
+				debugf("Calculation: %s\n", szCalculation);
 				//runCalculation(szCalculation);
 
 			    cursorPos = 0;
@@ -312,12 +290,12 @@ int main(int argc, char **argv)
 			case 'q':
 			case 'Q':
 				go = 0;
-				fputc(ch, pipe);
+//				remoteDebugChar(ch);
 				break;
 
 			default:
 				if (ch < ' ' || ch == 127) {
-					printf("[0x%02X]", ch);
+					debugf("[0x%02X]", ch);
 				}
 				else {
 					insert(ch);
@@ -326,5 +304,5 @@ int main(int argc, char **argv)
         }
     }
 
-    fclose(pipe);
+    //finishRemoteLogging();
 }

@@ -195,6 +195,38 @@ void delete()
 //    debugLine("delete() exit - Cursor pos [%d]", cursorPos);
 }
 
+void insert(int ch)
+{
+	int i = 0;
+	int j = 0;
+	int	cursorLeftCount = 0;
+
+	if (cursorPos < eolPos) {
+		strcpy(szTemp, &szCalculation[cursorPos]);
+	}
+
+	szCalculation[cursorPos] = ch;
+	putchar(ch);
+
+	if (cursorPos < eolPos) {
+		for (i = cursorPos + 1,j = 0;i <= eolPos;i++,j++) {
+			debugLine("['%c'][%d][%d][%d]", szCalculation[i], i, cursorPos, eolPos);
+
+			putchar(szTemp[j]);
+			szCalculation[i] = szTemp[j];
+
+			cursorLeftCount++;
+		}
+
+		szCalculation[i] = 0;
+
+		cursorLeft(cursorLeftCount);
+	}
+
+	eolPos++;
+	cursorPos++;
+}
+
 void runCalculation(char * calculation)
 {
 	memset(szCmd, 0, CMD_BUFFER_SIZE);
@@ -220,6 +252,9 @@ int main(int argc, char **argv)
 	if (pipe == NULL) {
 		printf("Failed to open pipe [%s]\n", argv[1]);
 	}
+
+	memset(szCalculation, 0, CMD_BUFFER_SIZE - 128);
+	memset(szTemp, 0, CMD_BUFFER_SIZE - 128);
 
     while (go) {
         ch = readch();
@@ -265,6 +300,9 @@ int main(int argc, char **argv)
 
 			    cursorPos = 0;
 			    eolPos = 0;
+
+			    memset(szCalculation, 0, CMD_BUFFER_SIZE - 128);
+				memset(szTemp, 0, CMD_BUFFER_SIZE - 128);
 				break;
 
 			case CHAR_DELETE:
@@ -282,10 +320,7 @@ int main(int argc, char **argv)
 					printf("[0x%02X]", ch);
 				}
 				else {
-					szCalculation[cursorPos++] = ch;
-					putchar(ch);
-
-					eolPos++;
+					insert(ch);
 				}
 				break;
         }

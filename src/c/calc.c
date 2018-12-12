@@ -11,12 +11,16 @@
 /*
  * Globals...
  */
-char	szCmd[CMD_BUFFER_SIZE];
-char	szCalculation[CMD_BUFFER_SIZE - 128];
-char	szTemp[CMD_BUFFER_SIZE - 128];
+char			szCmd[CMD_BUFFER_SIZE];
+char			szCalculation[CMD_BUFFER_SIZE - 128];
+char			szTemp[CMD_BUFFER_SIZE - 128];
 
-int		cursorPos = 0;
-int		eolPos = 0;
+int				cursorPos = 0;
+int				eolPos = 0;
+
+int				cmdBufferLength = 0;
+
+PCMDBUFFERLIST	pCmdBufferList = NULL;
 
 
 void decCursorPos()
@@ -222,11 +226,152 @@ void runCalculation(char * calculation)
     system(szCmd);
 }
 
+void addCmd(char * pszCmd)
+{
+	if (pCmdBufferList == NULL) {
+		pCmdBufferList = (PCMDBUFFERLIST)malloc(sizeof(CMDBUFFERLIST));
+
+		if (pCmdBufferList == NULL) {
+			debugf("Failed to allocate command buffer\n\n");
+			exit(-1);
+		}
+
+		pCmdBufferList->pNext = NULL;
+		pCmdBufferList->pPrevious = NULL;
+	}
+	else {
+		if (cmdBufferLength == MAX_CMD_BUFFER_DEPTH) {
+			/*
+			 * Find the oldest command to free up...
+			 */
+			while (pCmdBufferList->pPrevious != NULL) {
+				pCmdBufferList = pCmdBufferList->pPrevious;
+			}
+
+			/*
+			 * Unlink this item...
+			 */
+			free(pCmdBufferList->pItem->pszCommand);
+			free(pCmdBufferList->pItem);
+
+			pCmdBufferList = pCmdBufferList->pNext;
+			free(pCmdBufferList->pPrevious);
+			pCmdBufferList->pPrevious = NULL;
+
+			/*
+			 * Traverse back to the bottom (the latest command)...
+			 */
+			while (pCmdBufferList->pNext != NULL) {
+				pCmdBufferList = pCmdBufferList->pNext;
+			}
+		}
+
+		pCmdBufferList->pNext = (PCMDBUFFERLIST)malloc(sizeof(CMDBUFFERLIST));
+
+		if (pCmdBufferList->pNext == NULL) {
+			debugf("Failed to allocate command buffer\n\n");
+			exit(-1);
+		}
+
+		pCmdBufferList->pNext->pPrevious = pCmdBufferList;
+		pCmdBufferList = pCmdBufferList->pNext;
+
+		pCmdBufferList->pNext = NULL;
+	}
+
+	pCmdBufferList->pItem = (PCMDBUFFERITEM)malloc(sizeof(CMDBUFFERITEM));
+
+	if (pCmdBufferList->pItem == NULL) {
+		debugf("Failed to allocate command buffer item\n\n");
+		exit(-1);
+	}
+
+	pCmdBufferList->pItem->pszCommand = (char *)malloc(strlen(pszCmd) + 1);
+
+	if (pCmdBufferList->pItem->pszCommand == NULL) {
+		debugf("Failed to allocate command string\n\n");
+		exit(-1);
+	}
+
+	strcpy(pCmdBufferList->pItem->pszCommand, pszCmd);
+	pCmdBufferList->pItem->length = strlen(pszCmd);
+
+	cmdBufferLength++;
+}
+
+char * getNextCmd()
+{
+	if (pCmdBufferList->pNext != NULL) {
+		pCmdBufferList = pCmdBufferList->pNext;
+	}
+
+	return pCmdBufferList->pItem->pszCommand;
+}
+
+char * getPreviousCmd()
+{
+	if (pCmdBufferList->pPrevious != NULL) {
+		pCmdBufferList = pCmdBufferList->pPrevious;
+	}
+
+	return pCmdBufferList->pItem->pszCommand;
+}
+
+void handleCSI()
+{
+	int		ch;
+
+	ch = readch();
+
+	switch (ch) {
+		case CHAR_UP:
+			clearLine();
+			strcpy(szCalculation, getPreviousCmd());
+			debugf(szCalculation);
+			break;
+
+		case CHAR_DOWN:
+			clearLine();
+			strcpy(szCalculation, getNextCmd());
+			debugf(szCalculation);
+			break;
+
+		case CHAR_LEFT:
+			cursorLeft(1);
+			decCursorPos();
+			break;
+
+		case CHAR_RIGHT:
+			cursorRight(1);
+			incCursorPos();
+			break;
+
+		default:
+			debugf("CSI sequence [0x%02X] not currently supported.\n\n", ch);
+			break;
+	}
+}
+
+void handleEscapeChar()
+{
+	int		ch;
+
+	ch = readch();
+
+	switch (ch) {
+		case CHAR_CSI:
+			handleCSI();
+			break;
+
+		default:
+			debugf("Escape sequence [0x%02X] not currently supported.\n\n", ch);
+			break;
+	}
+}
+
 int main(int argc, char **argv)
 {
     int		ch = 0;
-    int 	ch2 = 0;
-    int 	ch3 = 0;
     int 	go = 1;
 
     //initRemoteLogging(argv[1]);
@@ -234,38 +379,15 @@ int main(int argc, char **argv)
 	memset(szCalculation, 0, CMD_BUFFER_SIZE - 128);
 	memset(szTemp, 0, CMD_BUFFER_SIZE - 128);
 
+	puts("Welcome to Calc. A command line scientific calculator.");
+	puts("Type a calculation or command at the prompt, type 'help' for info.\n");
+
     while (go) {
         ch = readch();
 
         switch (ch) {
 			case CHAR_ESCAPE:
-				ch2 = readch();
-
-				if (ch2 == CHAR_CSI) {
-					ch3 = readch();
-
-					switch (ch3) {
-						case CHAR_UP:
-							clearLine();
-							debugf("[UP]");
-							break;
-
-						case CHAR_DOWN:
-							clearLine();
-							debugf("[DOWN]");
-							break;
-
-						case CHAR_LEFT:
-							cursorLeft(1);
-							decCursorPos();
-							break;
-
-						case CHAR_RIGHT:
-							cursorRight(1);
-							incCursorPos();
-							break;
-					}
-				}
+				handleEscapeChar();
 				break;
 
 			case CHAR_NEWLINE:
@@ -273,8 +395,9 @@ int main(int argc, char **argv)
 
 				putchar(CHAR_NEWLINE);
 
-				debugf("Calculation: %s\n", szCalculation);
-				//runCalculation(szCalculation);
+				addCmd(szCalculation);
+				//debugf("Calculation: %s\n", szCalculation);
+				runCalculation(szCalculation);
 
 			    cursorPos = 0;
 			    eolPos = 0;
@@ -302,6 +425,28 @@ int main(int argc, char **argv)
 				}
 				break;
         }
+    }
+
+    /*
+     * Head to the top of the list...
+     */
+    while (pCmdBufferList->pPrevious != NULL) {
+    	pCmdBufferList = pCmdBufferList->pPrevious;
+    }
+
+    /*
+     * Traverse the list, freeing up each item...
+     */
+    while (pCmdBufferList->pNext != NULL) {
+    	/*
+    	 * Unlink this item...
+    	 */
+    	free(pCmdBufferList->pItem->pszCommand);
+    	free(pCmdBufferList->pItem);
+
+    	pCmdBufferList = pCmdBufferList->pNext;
+    	free(pCmdBufferList->pPrevious);
+    	pCmdBufferList->pPrevious = NULL;
     }
 
     //finishRemoteLogging();

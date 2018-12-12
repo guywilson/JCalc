@@ -52,8 +52,8 @@ public class Main
 		Operand						result = new Operand(0.0);
 		DebugHelper					dbg;
 
-		if (args.length > 1) {
-			for (i = 1;i < args.length;i++) {
+		if (args.length > 0) {
+			for (i = 0;i < args.length;i++) {
 				inputBuffer.append(args[i]);
 			}
 

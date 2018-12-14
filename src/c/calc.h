@@ -37,6 +37,8 @@ typedef struct _CMDBUFFERLIST
 	struct _CMDBUFFERLIST	*	pNext;
 	struct _CMDBUFFERLIST	*	pPrevious;
 
+	int							id;
+
 	PCMDBUFFERITEM				pItem;
 }
 CMDBUFFERLIST;

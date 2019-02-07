@@ -18,22 +18,25 @@ BUILD=build
 TARGET=bin/calc
 
 # C compiler
-C=gcc
+C=g++
 
 # Linker
-LINKER=gcc
+LINKER=g++
 
 # C compiler flags (Release)
 CFLAGS=-c -O3 -fpermissive -Wall
 
 # Object files
-OBJFILES=$(BUILD)/calc.o $(BUILD)/debug.o
+OBJFILES=$(BUILD)/calc.o $(BUILD)/debug.o $(BUILD)/cmdhistory.o
 
 # Target
 all: $(TARGET) bin/calclogger
 
 # Compile C source files
 #
+$(BUILD)/cmdhistory.o: $(SOURCE)/cmdhistory.cpp $(SOURCE)/cmdhistory.h
+	$(C) $(CFLAGS) -o $(BUILD)/cmdhistory.o $(SOURCE)/cmdhistory.cpp
+
 $(BUILD)/calc.o: $(SOURCE)/calc.c $(SOURCE)/calc.h $(SOURCE)/debug.h
 	$(C) $(CFLAGS) -o $(BUILD)/calc.o $(SOURCE)/calc.c
 

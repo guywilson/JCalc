@@ -62,11 +62,6 @@ void incCursorPosn(int n)
 	}
 }
 
-void prompt()
-{
-	printf("calc> ");
-}
-
 void debugf(const char * pszString, ...)
 {
 #ifdef DEBUG_ON
@@ -97,6 +92,11 @@ void cprintf(const char * pszString, ...)
 
 	eolPos += strlen(szBuffer);
 	incCursorPosn(strlen(szBuffer));
+}
+
+void prompt()
+{
+	printf("calc> ");
 }
 
 void runCalculation(char * calculation)
@@ -368,7 +368,9 @@ void clearLine()
 	putchar('2');
 	putchar(CHAR_ERASEINLINE);
 
-	cursorLeft(cursorPos);
+	cursorLeft(cursorPos + 6);
+
+	prompt();
 
 	cursorPos = 0;
 	eolPos = 0;
@@ -383,14 +385,12 @@ void handleCSI()
 	switch (ch) {
 		case CHAR_UP:
 			clearLine();
-			prompt();
 			strcpy(szCalculation, getPreviousCmd());
 			cprintf(szCalculation);
 			break;
 
 		case CHAR_DOWN:
 			clearLine();
-			prompt();
 			strcpy(szCalculation, getNextCmd());
 			cprintf(szCalculation);
 			break;

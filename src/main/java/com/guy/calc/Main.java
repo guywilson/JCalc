@@ -49,7 +49,6 @@ public class Main
 		int							i;
 		boolean						loop;
 		boolean						hasParams = false;
-		Operand						result = new Operand(0.0);
 		DebugHelper					dbg;
 
 		if (args.length > 0) {
@@ -65,8 +64,6 @@ public class Main
 		
 		CalcSystem sys = CalcSystem.getInstance();
 
-	    Calculator calc = new Calculator();
-	    
 		if (!hasParams) {
 			System.out.println("Welcome to Calc. A command line scientific calculator.");
 			System.out.println("Type a calculation or command at the prompt, type 'help' for info.\n");
@@ -96,83 +93,17 @@ public class Main
 				if (calculation.startsWith("exit") || calculation.startsWith("quit") || calculation.charAt(0) == 'q') {
 					loop = false;
 				}
-				else if (calculation.startsWith("dbgon")) {
-					dbg.setDebugOn();
-				}
-				else if (calculation.startsWith("dbgoff")) {
-					dbg.setDebugOff();
-				}
-				else if (calculation.startsWith("memst")) {
-					int memoryNum = 0;
-
-					if (calculation.length() > 5) {
-						memoryNum = Integer.valueOf(calculation.substring(5)).intValue();
-					}
-
-					sys.setMemoryValueAt(memoryNum, result);
-				}
-				else if (calculation.startsWith("memr")) {
-				    for (i = 0;i < CalcSystem.NUM_MEMORY_SLOTS;i++) {
-				        Operand mem = sys.getMemoryValueAt(i);
-				        String s = mem.toString(sys.getBase());
-				        System.out.println("[" + i + "] = " + s + "; ");
-				    }
-				    
-				    System.out.println();
-				}
-				else if (calculation.startsWith("dec")) {
-					sys.setBase(Base.Dec);
-
-				    String s = result.toString(Base.Dec);
-				    
-				    System.out.println("Result = " + s);
-				}
-				else if (calculation.startsWith("hex")) {
-					sys.setBase(Base.Hex);
-
-				    String s = result.toString(Base.Hex);
-				    
-				    System.out.println("Result = " + s);
-				}
-				else if (calculation.startsWith("bin")) {
-					sys.setBase(Base.Bin);
-
-				    String s = result.toString(Base.Bin);
-				    
-				    System.out.println("Result = " + s);
-				}
-				else if (calculation.startsWith("oct")) {
-					sys.setBase(Base.Oct);
-
-				    String s = result.toString(Base.Oct);
-				    
-				    System.out.println("Result = " + s);
-				}
-				else if (calculation.startsWith("setp")) {
-					int precision = 0;
-
-					if (calculation.length() > 4) {
-						precision = Integer.valueOf(calculation.substring(4)).intValue();
-
-						if (dbg.isDebugOn()) {
-							System.out.println("Precision = [" + precision + "]\n");
-						}
-
-				        if (precision < 0 || precision > CalcSystem.MAX_DISPLAY_PRECISION) {
-				            System.out.println("Precision must be between 0 and " + CalcSystem.MAX_DISPLAY_PRECISION + "\n");
-				        }
-				        else {
-				            sys.setScale(precision);
-				        }
-					}
-				}
-				else if (calculation.startsWith("help") || calculation.charAt(0) == '?') {
-					displayHelp();
-				}
 				else {
-					result = calc.evaluate(calculation.toString());
-
-					System.out.println(calculation + " = " + result.toString(sys.getBase()));
+					String resultString = handleCalculation(calculation);
+					
+					if (resultString != null) {
+						if (resultString.equals("quit")) {
+							loop = false;
+						}
+						else {
+							System.out.println(resultString);
+						}
+					}
 				}
 			}
 			catch (Exception e) {
@@ -184,5 +115,111 @@ public class Main
 				loop = false;
 			}
 		}
+	}
+	
+	public static String handleCalculation(String calculation) throws Exception
+	{
+		String 						strResult = null;
+		DebugHelper					dbg;
+		Operand						result = new Operand(0.0);
+		int							i;
+		
+		dbg = DebugHelper.getInstance();
+
+		CalcSystem sys = CalcSystem.getInstance();
+
+	    Calculator calc = new Calculator();
+
+	    try {
+			if (calculation.startsWith("exit") || calculation.startsWith("quit") || calculation.charAt(0) == 'q') {
+				strResult = "quit";
+			}
+			else if (calculation.startsWith("dbgon")) {
+				dbg.setDebugOn();
+			}
+			else if (calculation.startsWith("dbgoff")) {
+				dbg.setDebugOff();
+			}
+			else if (calculation.startsWith("memst")) {
+				int memoryNum = 0;
+
+				if (calculation.length() > 5) {
+					memoryNum = Integer.valueOf(calculation.substring(5)).intValue();
+				}
+
+				sys.setMemoryValueAt(memoryNum, result);
+			}
+			else if (calculation.startsWith("memr")) {
+				StringBuffer s = new StringBuffer();
+				
+			    for (i = 0;i < CalcSystem.NUM_MEMORY_SLOTS;i++) {
+			        Operand mem = sys.getMemoryValueAt(i);
+			        s.append("[" + i + "] = ").append(mem.toString(sys.getBase())).append(";\n");
+			    }
+			    
+			    s.append("\n");
+			    
+			    strResult = s.toString();
+			}
+			else if (calculation.startsWith("dec")) {
+				sys.setBase(Base.Dec);
+
+			    String s = result.toString(Base.Dec);
+			    
+			    strResult = "Result = " + s;
+			}
+			else if (calculation.startsWith("hex")) {
+				sys.setBase(Base.Hex);
+
+			    String s = result.toString(Base.Hex);
+			    
+			    strResult = "Result = " + s;
+			}
+			else if (calculation.startsWith("bin")) {
+				sys.setBase(Base.Bin);
+
+			    String s = result.toString(Base.Bin);
+			    
+			    strResult = "Result = " + s;
+			}
+			else if (calculation.startsWith("oct")) {
+				sys.setBase(Base.Oct);
+
+			    String s = result.toString(Base.Oct);
+			    
+			    strResult = "Result = " + s;
+			}
+			else if (calculation.startsWith("setp")) {
+				int precision = 0;
+
+				if (calculation.length() > 4) {
+					precision = Integer.valueOf(calculation.substring(4)).intValue();
+
+					if (dbg.isDebugOn()) {
+						System.out.println("Precision = [" + precision + "]\n");
+					}
+
+			        if (precision < 0 || precision > CalcSystem.MAX_DISPLAY_PRECISION) {
+			            strResult = "Precision must be between 0 and " + CalcSystem.MAX_DISPLAY_PRECISION + "\n";
+			        }
+			        else {
+			            sys.setScale(precision);
+			        }
+				}
+			}
+			else if (calculation.startsWith("help") || calculation.charAt(0) == '?') {
+				displayHelp();
+			}
+			else {
+				result = calc.evaluate(calculation.toString());
+
+				strResult = calculation + " = " + result.toString(sys.getBase());
+			}
+		}
+		catch (Exception e) {
+			throw e;
+		}
+		
+		return strResult;
 	}
 }

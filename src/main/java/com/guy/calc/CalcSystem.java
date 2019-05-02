@@ -1,14 +1,12 @@
 package com.guy.calc;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.Scanner;
 
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
+import com.guy.calc.util.console.CalcTerminal;
+import com.guy.calc.util.console.LineReader;
 
 public class CalcSystem
 {
@@ -22,9 +20,7 @@ public class CalcSystem
 	private Base base = Base.Dec;
 	private int scale = MAX_DISPLAY_SCALE;
 	
-	private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-	
-	private Scanner scan = new Scanner(System.in);
+	private LineReader reader = null;
 	
 	private static CalcSystem instance = null;
 	
@@ -33,6 +29,8 @@ public class CalcSystem
 		this.mc = new MathContext(MAX_DISPLAY_PRECISION, RoundingMode.HALF_UP);
 		this.base = Base.Dec;
 		this.scale = DEFAULT_SCALE;
+		
+		this.reader = new LineReader();
 	}
 	
 	public static CalcSystem getInstance()
@@ -107,49 +105,14 @@ public class CalcSystem
 		String input = null;
 		
 	    try {
-			System.out.print("calc [" + getModeStr() + "]> ");
+			CalcTerminal.getInstance().prompt();
 			
-//			while (true) {
-//				byte b = scan.nextByte();
-//				
-//				input = input + b;
-//				
-//				if (b == '\n') {
-//					break;
-//				}
-//			}
-			input = br.readLine();
+			input = reader.readLine();
 		}
 	    catch (Exception e) {
 			throw new Exception("Caught Exception - " + e.getMessage());
 		}
 	    
 	    return input;
-	}
-	
-	private String readLine() throws Exception
-	{
-		StringBuffer line = new StringBuffer();
-		int ch;
-		boolean eol = false;
-		
-		try {
-			while (!eol) {
-				ch = br.read();
-				
-				if (ch == '\n' || ch == '\r') {
-					eol = true;
-				}
-				else {
-					line.append((char)ch);
-				}
-			}
-		}
-		catch (Exception e) {
-			System.out.println("Caught exception - " + e.getMessage());
-			throw e;
-		}
-		
-		return line.toString();
 	}
 }

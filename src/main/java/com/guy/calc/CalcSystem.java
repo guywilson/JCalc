@@ -5,8 +5,7 @@ import java.math.RoundingMode;
 
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
-import com.guy.calc.util.console.CalcTerminal;
-import com.guy.calc.util.console.LineReader;
+import com.guy.log.Logger;
 
 public class CalcSystem
 {
@@ -20,17 +19,30 @@ public class CalcSystem
 	private Base base = Base.Dec;
 	private int scale = MAX_DISPLAY_SCALE;
 	
-	private LineReader reader = null;
+	private Logger log = new Logger(this.getClass());
 	
 	private static CalcSystem instance = null;
 	
 	private CalcSystem()
 	{
-		this.mc = new MathContext(MAX_DISPLAY_PRECISION, RoundingMode.HALF_UP);
-		this.base = Base.Dec;
-		this.scale = DEFAULT_SCALE;
+		log.entry();
 		
-		this.reader = new LineReader();
+		try {
+			this.mc = new MathContext(MAX_DISPLAY_PRECISION, RoundingMode.HALF_UP);
+			this.base = Base.Dec;
+			this.scale = DEFAULT_SCALE;
+		}
+		catch (Exception e) {
+			log.error("Error in constructor", e);
+			log.stack();
+		}
+		catch (Throwable th) {
+			log.fatal("Error in constructor", th);
+			log.stack();
+		}
+		finally {
+			log.exit();
+		}
 	}
 	
 	public static CalcSystem getInstance()
@@ -64,55 +76,88 @@ public class CalcSystem
 	
 	public Operand getMemoryValueAt(int index)
 	{
-		if (this.memory[index] == null) {
-			this.memory[index] = new Operand(0.0);
+		Operand op = null;
+		
+		log.entry();
+		
+		try {
+			if (this.memory[index] == null) {
+				this.memory[index] = new Operand(0.0);
+			}
+			
+			op = this.memory[index];
+		}
+		catch (Exception e) {
+			log.error("Error retrieving memory [" + index + "]", e);
+			log.trace(e);
+		}
+		catch (Throwable th) {
+			log.fatal("Error retrieving memory [" + index + "]", th);
+			log.trace(th);
+		}
+		finally {
+			log.exit();
 		}
 		
-		return this.memory[index];
+		return op;
 	}
 	
-	public void setMemoryValueAt(int index, Operand value) {
-		this.memory[index] = value;
+	public void setMemoryValueAt(int index, Operand value)
+	{
+		log.entry();
+		
+		try {
+			this.memory[index] = value;
+		}
+		catch (Exception e) {
+			log.error("Error storing memory [" + index + "]", e);
+			log.trace(e);
+		}
+		catch (Throwable th) {
+			log.fatal("Error storing memory [" + index + "]", th);
+			log.trace(th);
+		}
+		finally {
+			log.exit();
+		}
 	}
     
 	public String getModeStr()
 	{
 	    String mode = null;
 	    
-	    switch (getBase()) {
-	        case Dec:
-	            mode = "DEC";
-	            break;
-	            
-	        case Hex:
-	            mode = "HEX";
-	            break;
-	            
-	        case Bin:
-	            mode = "BIN";
-	            break;
-	            
-	        case Oct:
-	            mode = "OCT";
-	            break;
-	    }
+		log.entry();
+		
+		try {
+		    switch (getBase()) {
+		        case Dec:
+		            mode = "DEC";
+		            break;
+		            
+		        case Hex:
+		            mode = "HEX";
+		            break;
+		            
+		        case Bin:
+		            mode = "BIN";
+		            break;
+		            
+		        case Oct:
+		            mode = "OCT";
+		            break;
+		            
+		        default:
+		        	throw new Exception("Got invalid base");
+		    }
+		}
+		catch (Exception e) {
+			log.error("Error getting mode string", e);
+			log.trace(e);
+		}
+		finally {
+			log.exit();
+		}
 	    
 	    return mode;
-	}
-	
-	public String getUserInput() throws Exception
-	{
-		String input = null;
-		
-	    try {
-			CalcTerminal.getInstance().prompt();
-			
-			input = reader.readLine();
-		}
-	    catch (Exception e) {
-			throw new Exception("Caught Exception - " + e.getMessage());
-		}
-	    
-	    return input;
 	}
 }

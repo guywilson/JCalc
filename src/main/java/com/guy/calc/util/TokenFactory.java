@@ -7,30 +7,48 @@ import com.guy.calc.token.Operand;
 import com.guy.calc.token.Operator;
 import com.guy.calc.token.Token;
 import com.guy.calc.type.Base;
+import com.guy.log.Logger;
 
 public class TokenFactory
 {
 	public static Token createToken(String token, Base b) throws Exception
 	{
-		Token t;
+		Logger log = new Logger(TokenFactory.class);
+		
+		Token t = null;
 
-		if (Token.isOperand(token)) {
-			t = new Operand(token);
+		log.entry();
+		
+		try {
+			if (Token.isOperand(token)) {
+				log.debug("Found Operand [" + token + "]");
+				t = new Operand(token);
+			}
+			else if (Token.isOperator(token)) {
+				log.debug("Found Operator [" + token + "]");
+				t = new Operator(token);
+			}
+			else if (Token.isBrace(token)) {
+				log.debug("Found Brace [" + token + "]");
+				t = new Brace(token);
+			}
+			else if (Token.isConstant(token)) {
+				log.debug("Found Constant [" + token + "]");
+				t = new Constant(token);
+			}
+			else if (Token.isFunction(token)) {
+				log.debug("Found Function [" + token + "]");
+				t = new Function(token);
+			}
+			else {
+				throw new Exception("Invalid token found");
+			}
 		}
-		else if (Token.isOperator(token)) {
-			t = new Operator(token);
+		catch (Exception e) {
+			log.error("Error creating token from [" + token + "]", e);
 		}
-		else if (Token.isBrace(token)) {
-			t = new Brace(token);
-		}
-		else if (Token.isConstant(token)) {
-			t = new Constant(token);
-		}
-		else if (Token.isFunction(token)) {
-			t = new Function(token);
-		}
-		else {
-			throw new Exception("Invalid token found");
+		finally {
+			log.exit();
 		}
 
 		return t;

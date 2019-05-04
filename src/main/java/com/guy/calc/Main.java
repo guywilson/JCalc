@@ -3,6 +3,8 @@ package com.guy.calc;
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
 import com.guy.calc.util.DebugHelper;
+import com.guy.calc.util.console.CalcTerminal;
+import com.guy.log.Logger;
 
 public class Main
 {
@@ -37,20 +39,20 @@ public class Main
 	    System.out.println("\toct\tSwitch to octal mode");
 	    System.out.println("\tsetpn\tSet the precision to n");
 		System.out.println("\thelp\tThis help text");
-		System.out.println("\tdbgon\tTurn on debugging output");
-		System.out.println("\tdbgoff\tTurn off debugging output");
 		System.out.println("\texit\tExit the calculator\n");
 	}
 	
 	public static void main(String[] args)
 	{
-		String						calculation = null;
-		StringBuffer				inputBuffer = new StringBuffer();
-		int							i;
-		boolean						loop;
-		boolean						hasParams = false;
-		DebugHelper					dbg;
+		String			calculation = null;
+		StringBuffer	inputBuffer = new StringBuffer();
+		int				i;
+		boolean			loop;
+		boolean			hasParams = false;
+		Logger			log = new Logger(Main.class);
 
+		log.entry();
+		
 		if (args.length > 0) {
 			for (i = 0;i < args.length;i++) {
 				inputBuffer.append(args[i]);
@@ -60,10 +62,6 @@ public class Main
 			hasParams = true;
 		}
 
-		dbg = DebugHelper.getInstance();
-		
-		CalcSystem sys = CalcSystem.getInstance();
-
 		if (!hasParams) {
 			System.out.println("Welcome to Calc. A command line scientific calculator.");
 			System.out.println("Type a calculation or command at the prompt, type 'help' for info.\n");
@@ -71,19 +69,24 @@ public class Main
 		
 		loop = true;
 
+		CalcTerminal terminal = CalcTerminal.getInstance();
+		
 		while (loop) {
 			try {
 				if (!hasParams) {
 				    try {
-						calculation = sys.getUserInput();
+						calculation = terminal.readLine();
 					}
 				    catch (Exception e) {
+				    	System.out.println("\nError reading line");
 						e.printStackTrace();
+						
+						log.error("Error reading line", e);
+						log.trace(e);
+						throw e;
 					}
 
-					if (dbg.isDebugOn()) {
-						System.out.println("Calculation entered = [" + calculation + "]\n");
-					}
+					log.debug("Calculation entered = [" + calculation + "]");
 				}
 
 				if (calculation.length() == 0) {
@@ -101,20 +104,26 @@ public class Main
 							loop = false;
 						}
 						else {
+							log.debug(resultString);
 							System.out.println(resultString);
 						}
 					}
 				}
 			}
 			catch (Exception e) {
-				System.out.println("Caught exception: " + e.getMessage());
+				System.out.println("\nFailed to calculate [" + calculation + "]: " + e.getMessage());
 				e.printStackTrace();
+				
+				log.error("Failed to calculate [" + calculation + "]", e);
+				log.trace(e);
 			}
 
 			if (hasParams) {
 				loop = false;
 			}
 		}
+		
+		log.exit();
 	}
 	
 	public static String handleCalculation(String calculation) throws Exception

@@ -1,9 +1,14 @@
 package com.guy.calc;
 
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.DefaultParser;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
 import com.guy.calc.util.DebugHelper;
-import com.guy.calc.util.console.CalcTerminal;
 import com.guy.log.Logger;
 
 public class Main
@@ -50,6 +55,8 @@ public class Main
 		boolean			loop;
 		boolean			hasParams = false;
 		Logger			log = new Logger(Main.class);
+		Terminal		terminal;
+		LineReader		reader;
 
 		log.entry();
 		
@@ -69,13 +76,29 @@ public class Main
 		
 		loop = true;
 
-		CalcTerminal terminal = CalcTerminal.getInstance();
-		
+		TerminalBuilder builder = TerminalBuilder.builder();
+
+		try {
+			terminal = builder.build();
+
+	        reader = 
+	        	LineReaderBuilder.builder()
+					.terminal(terminal)
+					.parser(new DefaultParser())
+					.build();
+	        
+	        reader.setOpt(LineReader.Option.AUTO_FRESH_LINE);
+		}
+		catch (Exception e) {
+			System.out.println("Failed to create terminal: " + e.getMessage());
+			return;
+		}
+
 		while (loop) {
 			try {
 				if (!hasParams) {
 				    try {
-						calculation = terminal.readLine();
+						calculation = reader.readLine("calc> ");
 					}
 				    catch (Exception e) {
 				    	System.out.println("\nError reading line");

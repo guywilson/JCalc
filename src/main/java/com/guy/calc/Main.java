@@ -8,7 +8,6 @@ import org.jline.terminal.TerminalBuilder;
 
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
-import com.guy.calc.util.DebugHelper;
 import com.guy.log.Logger;
 
 public class Main
@@ -93,8 +92,6 @@ public class Main
 			return;
 		}
 
-		DebugHelper dbg = DebugHelper.getInstance();
-
 		CalcSystem sys = CalcSystem.getInstance();
 	    Calculator calc = new Calculator();
 
@@ -124,12 +121,6 @@ public class Main
 
 				if (calculation.startsWith("exit") || calculation.startsWith("quit") || calculation.charAt(0) == 'q') {
 					loop = false;
-				}
-				else if (calculation.startsWith("dbgon")) {
-					dbg.setDebugOn();
-				}
-				else if (calculation.startsWith("dbgoff")) {
-					dbg.setDebugOff();
 				}
 				else if (calculation.startsWith("memst")) {
 					int memoryNum = 0;
@@ -183,9 +174,7 @@ public class Main
 					if (calculation.length() > 4) {
 						precision = Integer.valueOf(calculation.substring(4)).intValue();
 
-						if (dbg.isDebugOn()) {
-							System.out.println("Precision = [" + precision + "]\n");
-						}
+						log.debug("Precision = [" + precision + "]");
 
 				        if (precision < 0 || precision > CalcSystem.MAX_DISPLAY_PRECISION) {
 				            System.out.println("Precision must be between 0 and " + CalcSystem.MAX_DISPLAY_PRECISION + "\n");

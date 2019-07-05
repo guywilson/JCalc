@@ -2,12 +2,13 @@ package com.guy.calc.token;
 
 import com.guy.calc.CalcSystem;
 import com.guy.calc.util.CharUtils;
-import com.guy.calc.util.DebugHelper;
+import com.guy.log.Logger;
 
 public abstract class Token
 {
 	private String _token;
 	private String _className;
+	private Logger log = new Logger(Token.class);
         
     private static boolean isDecDigit(char digit)
     {
@@ -31,12 +32,8 @@ public abstract class Token
 	protected Token(String token, String className)
 	{
 		this(token);
-		
-		DebugHelper dbg = DebugHelper.getInstance();
 
-		if (dbg.isDebugOn()) {
-			System.out.println("Creating Token of type " + className + " with token '" + token + "'");
-		}
+		log.debug("Creating Token of type " + className + " with token '" + token + "'");
 		
 		setClass(className);
 	}

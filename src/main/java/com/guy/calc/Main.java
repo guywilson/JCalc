@@ -101,7 +101,31 @@ public class Main
 			try {
 				if (!hasParams) {
 				    try {
-						calculation = reader.readLine("calc> ");
+						String mode;
+
+						switch (sys.getBase()) {
+							case Dec:
+								mode = "DEC";
+								break;
+
+							case Bin:
+								mode = "BIN";
+								break;
+
+							case Hex:
+								mode = "HEX";
+								break;
+
+							case Oct:
+								mode = "OCT";
+								break;
+
+							default:
+								mode = "DEC";
+								break;
+						}
+
+						calculation = reader.readLine("calc " + "[" + mode + "]> ");
 					}
 				    catch (Exception e) {
 				    	System.out.println("\nError reading line");

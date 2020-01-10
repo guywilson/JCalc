@@ -5,6 +5,7 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.InfoCmp.Capability;
 
 import com.guy.calc.token.Operand;
 import com.guy.calc.type.Base;
@@ -42,6 +43,7 @@ public class Main
 	    System.out.println("\tbin\tSwitch to binary mode");
 	    System.out.println("\toct\tSwitch to octal mode");
 	    System.out.println("\tsetpn\tSet the precision to n");
+	    System.out.println("\tcls\tClear the screen");
 		System.out.println("\thelp\tThis help text");
 		System.out.println("\texit\tExit the calculator\n");
 	}
@@ -85,7 +87,7 @@ public class Main
 					.parser(new DefaultParser())
 					.build();
 	        
-	        reader.setOpt(LineReader.Option.AUTO_FRESH_LINE);
+			reader.setOpt(LineReader.Option.AUTO_FRESH_LINE);
 		}
 		catch (Exception e) {
 			System.out.println("Failed to create terminal: " + e.getMessage());
@@ -207,6 +209,9 @@ public class Main
 				            sys.setScale(precision);
 				        }
 					}
+				}
+				else if (calculation.startsWith("cls") || calculation.startsWith("clear")) {
+					terminal.puts(Capability.clear_screen);
 				}
 				else if (calculation.startsWith("help") || calculation.charAt(0) == '?') {
 					displayHelp();

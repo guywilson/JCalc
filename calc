@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp=/Library/Java/Extensions/jcalc-1.0.0.jar:/Library/Java/Extensions/jline-3.11.0.jar:/Library/Java/Extensions/Logger-1.0.jar
+cp=/usr/local/lib/jcalc-1.0.0.jar:/usr/local/lib/jline-3.11.0.jar:/usr/local/lib/Logger-1.0.jar
 mainclass=com.guy.calc.Main
 
 java -classpath $cp $mainclass

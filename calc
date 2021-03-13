@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Modify the cp (classpath) variable to match the paths on your system...
-cp=/usr/local/lib/jcalc-1.0.0.jar:/usr/local/lib/jline-3.11.0.jar:/usr/local/lib/Logger-1.0.jar
+cp=/Users/guy/Library/Java/lib/jcalc-1.0.0.jar:/Users/guy/Library/Java/lib/jline-3.19.1-SNAPSHOT.jar:/Users/guy/Library/Java/lib/Logger-1.0.jar
 
 mainclass=com.guy.calc.Main
 

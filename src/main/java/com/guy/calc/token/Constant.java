@@ -10,7 +10,8 @@ public class Constant extends Operand
 
 	private static BigDecimal _pi()
 	{
-		BigDecimal pi = BigDecimal.valueOf(Math.PI);
+//		BigDecimal pi = BigDecimal.valueOf(Math.PI);
+		BigDecimal pi = new BigDecimal("3.1415926535897932384626433832795028841971693993751058209749445923");
 		
 		return pi;
 	}

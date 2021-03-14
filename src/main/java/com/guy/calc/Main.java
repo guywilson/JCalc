@@ -212,6 +212,10 @@ public class Main
 				}
 				else if (calculation.startsWith("cls") || calculation.startsWith("clear")) {
 					terminal.puts(Capability.clear_screen);
+
+					reader.printAbove("Welcome to Calc. A command line scientific calculator.");
+					reader.printAbove("Type a calculation or command at the prompt, type 'help' for info.\n");
+					reader.printAbove("\n");
 				}
 				else if (calculation.startsWith("help") || calculation.charAt(0) == '?') {
 					displayHelp();

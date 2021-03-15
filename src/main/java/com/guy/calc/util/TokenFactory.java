@@ -46,6 +46,7 @@ public class TokenFactory
 		}
 		catch (Exception e) {
 			log.error("Error creating token from [" + token + "]", e);
+			throw e;
 		}
 		finally {
 			log.exit();
